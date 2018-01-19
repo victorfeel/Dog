@@ -1,0 +1,28 @@
+v1.0
+
+接口名称：搜索功能
+请求地址：
+http://192.168.1.10:8081/searchOfwd?wd=666,&type=baidu,biyin
+输入参数（必填）：
+wd:搜索关键字
+type：搜索类型
+输入参数：
+{
+wd:"666",
+type:"baidu,biyin"
+}
+输出参数：
+{
+    "list": [
+        {
+            "title": "666_百度百科\n                \n                            来源引申含义",
+            "href": "http://www.baidu.com/link?url=yflCxbEwubHYwQINafajy12ZF96ERe-ZjGaOlUoxMO0K_OEf2MNTj6VMfTaXhdK8Y2l0kqK8zkvM-QBa4I6ujK",
+            "content": ""
+        },
+        {
+            "title": "“666”什么意思?_百度知道https://zhidao.baidu.com/quest... 打游戏人家说666是什么意思网络上666什么意思666是什么意思?更多知道相关问题>>",
+            "href": "http://www.baidu.com/link?url=FxRS32JLEouuorinwHoNa6AC9ivLHgQ1ysa-n9cuiEK7ishtmzLV1IzypLO_pXApzkOyCp7-RAJLIFG_8hJ6a9M47_mcoocNRZBDEwfIVl3",
+            "content": "最佳答案: 你好,很高兴为你回答这个问题: 666是近期在LOL对局中开始流行起来的数字简化语言(其实很早之前就有了) 666是口头语..."
+        }
+    ]
+}
