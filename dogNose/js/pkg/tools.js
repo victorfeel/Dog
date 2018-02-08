@@ -19,8 +19,16 @@ tools.router = function(app) {
 			res.send("这位小可爱，你没输入任何字或词或句子！");
 			return;
 		}
-		for(var i=0;i<type.length;i++){
-			request(tools.url[type[i]](keywd), function(error, response, body) {
+		for(var i=0,l=type.length;i<l;i++){
+			var _request = request.defaults({jar: true});
+			var strUrl = tools.url[type[i]](keywd);
+			var options = {
+		        url: strUrl,
+		        method: 'GET',
+		        headers: config.headers
+		        //sendImmediately: false  //默认为真，发送一个基本的认证header。设为false之后，收到401会重试（服务器的401响应必须包含WWW-Authenticate指定认证方法）。
+		    };
+			_request(options, function(error, response, body) {
 				if(!error && response.statusCode == 200) {
 					tools.analysis[type[j]](cheerio.load(body),data.list,keywd);
 					j++;
@@ -28,6 +36,8 @@ tools.router = function(app) {
 						j=0;
 						res.send(data);
 					}
+				}else{
+					res.send(data);
 				}
 			});
 		}
@@ -40,20 +50,25 @@ tools.router = function(app) {
 };
 tools.url = {
 	//请求URL列表
-	baidu:function(wd){
-		return "http://www.baidu.com/s?wd="+encodeURI(wd);
+	bd:function(wd){
+		return config.to["bd"]+""+encodeURI(wd)+"&timeD="+tools.getTime();
 	},
-	biyin:function(wd){
-		return "http://cn.bing.com/search?q=" + encodeURI(wd);
+	by:function(wd){
+		return config.to["by"]+""+encodeURI(wd)+"&timeD="+tools.getTime();
 	},
-	csdn:function(wd){
-		return "http://so.csdn.net/so/search/s.do?q=" + encodeURI(wd);
+	cn:function(wd){
+		return config.to["cn"]+""+ encodeURI(wd)+"&timeD="+tools.getTime();
+	},
+	oh:function(wd){
+		return config.to["oh"]+""+ encodeURI(wd)+"&timeD="+tools.getTime();
 	}
-	
 };
+tools.getTime=function(){
+	return new Date().getTime();
+}
 tools.analysis = {
 	//组织JSON对象
-	baidu:function($,jsonobj,keywd){
+	bd:function($,jsonobj,keywd){
 		$("#content_left").find(".c-container").each(function(i) {
 		var obj = {};
 		var key = $(this).find("a").text();
@@ -66,13 +81,13 @@ tools.analysis = {
 			if(content==""){
 				content = $(this).find(".c-span-last p").eq(0).text();
 			}
-			obj.img = $(this).find(".c-span6 a").html();
 			obj.content = content;
 			obj.href = $(this).find("a").attr("href");
+			obj.sourse = "baidu";
 			jsonobj.push(obj);
 		});
 	},
-	biyin:function($,jsonobj,keywd){
+	by:function($,jsonobj,keywd){
 		$("#b_results").find(".b_algo").each(function(i) {
 		var obj = {};
 		var key = $(this).find("h2").text();
@@ -81,13 +96,13 @@ tools.analysis = {
 			}else{
 				return;
 			}
-			obj.href = $(this).find("h2 a").attr("href");
 			obj.content = $(this).find(".b_caption p").text();
-			obj.date = $(this).find(".b_attribution").html();
+			obj.href = $(this).find("h2 a").attr("href");
+			obj.sourse = "biyin";
 			jsonobj.push(obj);
 		});
 	},
-	csdn:function($,jsonobj,keywd){
+	cn:function($,jsonobj,keywd){
 		$(".search-list-con").find(".search-list").each(function(i) {
 		var obj = {};
 			var key = $(this).find("dt").text();
@@ -98,7 +113,22 @@ tools.analysis = {
 			}
 			obj.content = $(this).find(".search-detail").text();
 			obj.href = $(this).find("dt a").attr("href");
-			obj.date = $(this).find(".search-link").text();
+			obj.sourse = "csdn";
+			jsonobj.push(obj);
+		});
+	},
+	oh:function($,jsonobj,keywd){
+		$("#results").find("li").each(function(i) {
+		var obj = {};
+			var key = $(this).find("h3").text();
+			if(key.indexOf(keywd)!=-1){
+				obj.title = (key+"").replace(keywd,"<i>"+keywd+"</i>");
+			}else{
+				return;
+			}
+			obj.href = $(this).find("h3 a").attr("href");
+			obj.content = $(this).find(".outline").text();
+			obj.sourse = "oschina";
 			jsonobj.push(obj);
 		});
 	}
